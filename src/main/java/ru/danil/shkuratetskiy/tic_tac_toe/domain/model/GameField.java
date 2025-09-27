@@ -3,13 +3,18 @@ package ru.danil.shkuratetskiy.tic_tac_toe.domain.model;
 import java.util.Arrays;
 
 public class GameField {
-    public final int HEIGHT = 3;
+    public static final int HEIGHT = 3;
     private CellType[][] archiveField;
     private final CellType[][] field;
 
     public GameField() {
         this.field = initField();
         this.archiveField = initField();
+    }
+
+    public GameField(CellType[][] archiveField, CellType[][] field) {
+        this.field = field;
+        this.archiveField = archiveField;
     }
 
     public void makeFieldArchive() {
@@ -20,17 +25,20 @@ public class GameField {
     }
 
     public boolean validateField() {
-        int counter = 0;
+        int diffCount = 0;
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < HEIGHT; j++) {
-                if (field[i][j] == archiveField[i][j]) {
-                    counter++;
+                if (field[i][j] != archiveField[i][j]) {
+                    diffCount++;
+                    if (field[i][j] == CellType.EMPTY) {
+                        return false;
+                    }
                 }
             }
         }
-
-        return counter == HEIGHT * HEIGHT - 1;
+        return diffCount == 1;
     }
+
 
     private CellType[][] initField() {
         CellType[][] field = new CellType[HEIGHT][HEIGHT];
@@ -104,5 +112,13 @@ public class GameField {
         if (cellType == CellType.CROSS) return Winner.PLAYER1;
         if (cellType == CellType.ZERO) return Winner.PLAYER2;
         return null;
+    }
+
+    public CellType[][] getArchiveField() {
+        return archiveField;
+    }
+
+    public CellType[][] getField() {
+        return field;
     }
 }

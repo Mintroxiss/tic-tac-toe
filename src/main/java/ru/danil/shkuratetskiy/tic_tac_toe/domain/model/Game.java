@@ -7,6 +7,11 @@ public class Game {
     private final UUID id;
     private final GameField gameField;
 
+    public Game() {
+        this.id = UUID.randomUUID();
+        this.gameField = new GameField();
+    }
+
     public Game(UUID id, GameField gameField) {
         this.id = id;
         this.gameField = gameField;

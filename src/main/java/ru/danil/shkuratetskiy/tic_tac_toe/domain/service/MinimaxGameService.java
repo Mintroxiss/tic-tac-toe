@@ -36,7 +36,7 @@ public class MinimaxGameService implements GameService {
         int moveX = -1;
         int moveY = -1;
 
-        int n = gameField.HEIGHT;
+        int n = GameField.HEIGHT;
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
