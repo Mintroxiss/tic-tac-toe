@@ -22,15 +22,13 @@ public class MinimaxGameService implements GameService {
     /**
      * Делает ход компьютера по алгоритму "Минимакс"
      *
-     * @param id идентификатор игры
      * @return обновленная сессия игры
      */
     @Override
-    public Game makeComputerMove(UUID id) {
-        Game game = repository.get(id);
+    public Game makeComputerMove(Game game) {
         GameField gameField = game.getGameField();
 
-        CellType computerCellType = CellType.ZERO;
+        CellType computerCellType = CellType.O;
 
         int bestScore = Integer.MIN_VALUE;
         int moveX = -1;
@@ -54,7 +52,6 @@ public class MinimaxGameService implements GameService {
             }
         }
 
-        gameField.makeFieldArchive();
         gameField.setFieldCell(moveX, moveY, computerCellType);
 
         repository.save(game);
@@ -70,26 +67,29 @@ public class MinimaxGameService implements GameService {
      * @return числовая оценка
      */
     private int minimaxScore(GameField field, boolean isComputerTurn) {
-        switch (field.getWinner()) {
-            case PLAYER1 -> {
-                return 1;
-            }
-            case PLAYER2 -> {
-                return -1;
-            }
-            case DRAW -> {
-                return 0;
+        Winner winner = field.getWinner();
+        if (winner != null) {
+            switch (winner) {
+                case PLAYER1 -> {
+                    return -1;
+                }
+                case PLAYER2 -> {
+                    return 1;
+                }
+                case DRAW -> {
+                    return 0;
+                }
             }
         }
 
-        int n = field.HEIGHT;
+        int n = GameField.HEIGHT;
 
         if (isComputerTurn) {
             int maxScore = Integer.MIN_VALUE;
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     if (field.getFieldCell(i, j) == CellType.EMPTY) {
-                        field.setFieldCell(i, j, CellType.ZERO);
+                        field.setFieldCell(i, j, CellType.O);
                         int score = minimaxScore(field, false);
                         field.setFieldCell(i, j, CellType.EMPTY);
                         maxScore = Math.max(maxScore, score);
@@ -102,7 +102,7 @@ public class MinimaxGameService implements GameService {
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     if (field.getFieldCell(i, j) == CellType.EMPTY) {
-                        field.setFieldCell(i, j, CellType.CROSS);
+                        field.setFieldCell(i, j, CellType.X);
                         int score = minimaxScore(field, true);
                         field.setFieldCell(i, j, CellType.EMPTY);
                         minScore = Math.min(minScore, score);
@@ -114,11 +114,13 @@ public class MinimaxGameService implements GameService {
     }
 
     @Override
-    public boolean validateField(UUID id) {
-        Game game = repository.get(id);
-        GameField gameField = game.getGameField();
-
-        return gameField.validateField();
+    public boolean validateField(Game game, int row, int col) {
+        Game repoGame = repository.get(game.getId());
+        GameField repoGameField = repoGame.getGameField();
+        if (repoGameField.getFieldCell(row, col) != CellType.EMPTY) {
+            return false;
+        }
+        return GameField.validateField(game.getGameField(), repoGame.getGameField());
     }
 
     @Override
@@ -127,5 +129,17 @@ public class MinimaxGameService implements GameService {
         GameField gameField = game.getGameField();
 
         return gameField.getWinner();
+    }
+
+    @Override
+    public Game getGameById(UUID id) {
+        return repository.get(id);
+    }
+
+    @Override
+    public UUID createNewGame() {
+        Game game = new Game();
+        repository.save(game);
+        return game.getId();
     }
 }

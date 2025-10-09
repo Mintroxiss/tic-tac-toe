@@ -1,36 +1,24 @@
 package ru.danil.shkuratetskiy.tic_tac_toe.domain.model;
 
-import java.util.Arrays;
-
 public class GameField {
     public static final int HEIGHT = 3;
-    private CellType[][] archiveField;
     private final CellType[][] field;
 
     public GameField() {
         this.field = initField();
-        this.archiveField = initField();
     }
 
-    public GameField(CellType[][] archiveField, CellType[][] field) {
+    public GameField(CellType[][] field) {
         this.field = field;
-        this.archiveField = archiveField;
     }
 
-    public void makeFieldArchive() {
-        archiveField = new CellType[HEIGHT][HEIGHT];
-        for (int i = 0; i < HEIGHT; i++) {
-            archiveField[i] = Arrays.copyOf(field[i], HEIGHT);
-        }
-    }
-
-    public boolean validateField() {
+    public static boolean validateField(GameField gameField, GameField repoGameField) {
         int diffCount = 0;
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < HEIGHT; j++) {
-                if (field[i][j] != archiveField[i][j]) {
+                if (gameField.getFieldCell(i, j) != repoGameField.getFieldCell(i, j)) {
                     diffCount++;
-                    if (field[i][j] == CellType.EMPTY) {
+                    if (gameField.getFieldCell(i, j) == CellType.EMPTY) {
                         return false;
                     }
                 }
@@ -38,7 +26,6 @@ public class GameField {
         }
         return diffCount == 1;
     }
-
 
     private CellType[][] initField() {
         CellType[][] field = new CellType[HEIGHT][HEIGHT];
@@ -109,13 +96,9 @@ public class GameField {
     }
 
     private Winner cellTypeToWinner(CellType cellType) {
-        if (cellType == CellType.CROSS) return Winner.PLAYER1;
-        if (cellType == CellType.ZERO) return Winner.PLAYER2;
+        if (cellType == CellType.X) return Winner.PLAYER1;
+        if (cellType == CellType.O) return Winner.PLAYER2;
         return null;
-    }
-
-    public CellType[][] getArchiveField() {
-        return archiveField;
     }
 
     public CellType[][] getField() {

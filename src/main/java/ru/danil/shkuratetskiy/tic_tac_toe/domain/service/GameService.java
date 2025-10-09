@@ -6,9 +6,13 @@ import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Winner;
 import java.util.UUID;
 
 public interface GameService {
-    Game makeComputerMove(UUID id);
+    Game makeComputerMove(Game game);
 
-    boolean validateField(UUID id);
+    boolean validateField(Game game, int row, int col);
 
     Winner isGameOver(UUID id);
+
+    Game getGameById(UUID id);
+
+    UUID createNewGame();
 }

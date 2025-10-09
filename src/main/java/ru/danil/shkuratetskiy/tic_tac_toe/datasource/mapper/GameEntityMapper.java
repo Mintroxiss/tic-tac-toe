@@ -10,7 +10,6 @@ public class GameEntityMapper {
         return new Game(
                 gameEntity.getId(),
                 new GameField(
-                        gameEntity.getGameField().getArchiveField(),
                         gameEntity.getGameField().getField()
                 )
         );
@@ -20,7 +19,6 @@ public class GameEntityMapper {
         return new GameEntity(
                 game.getId(),
                 new GameFieldEntity(
-                        game.getGameField().getArchiveField(),
                         game.getGameField().getField()
                 )
         );

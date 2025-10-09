@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 public class InternalGameRepository implements GameRepository {
-    ConcurrentHashMap<UUID, GameEntity> games;
+    private final ConcurrentHashMap<UUID, GameEntity> games;
 
     public InternalGameRepository() {
         this.games = new ConcurrentHashMap<>();
