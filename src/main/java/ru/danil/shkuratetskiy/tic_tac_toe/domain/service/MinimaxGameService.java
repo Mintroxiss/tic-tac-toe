@@ -124,10 +124,8 @@ public class MinimaxGameService implements GameService {
     }
 
     @Override
-    public Winner isGameOver(UUID id) {
-        Game game = repository.get(id);
+    public Winner isGameOver(Game game) {
         GameField gameField = game.getGameField();
-
         return gameField.getWinner();
     }
 
@@ -141,5 +139,10 @@ public class MinimaxGameService implements GameService {
         Game game = new Game();
         repository.save(game);
         return game.getId();
+    }
+
+    @Override
+    public void saveGame(Game game) {
+        repository.save(game);
     }
 }

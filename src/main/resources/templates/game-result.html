@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результат игры — Крестики-нолики</title>
+    <link rel="stylesheet" th:href="@{/css/game-result.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Крестики-нолики</h1>
+
+    <table>
+        <tr th:each="row, rowStat : ${field}">
+            <td th:each="cell, colStat : ${row}">
+                <button type="button"
+                        th:text="${cell}"
+                        th:attr="data-row=${rowStat.index},data-col=${colStat.index}"
+                        disabled></button>
+            </td>
+        </tr>
+    </table>
+
+    <p class="result-text" th:text="${resultText}">Игрок победил!</p>
+
+    <div class="actions">
+        <a th:href="@{/game/new}" role="button">Новая игра</a>
+        <a th:href="@{/}" role="button">Главное меню</a>
+    </div>
+</div>
+</body>
+</html>

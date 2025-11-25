@@ -4,6 +4,7 @@ import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.CellType;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Game;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.GameField;
 import ru.danil.shkuratetskiy.tic_tac_toe.web.model.GameDto;
+import ru.danil.shkuratetskiy.tic_tac_toe.web.model.GameStatus;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public class GameDtoMapper {
         ).toList());
     }
 
-    public static GameDto toGameDto(Game game, String status) {
+    public static GameDto toGameDto(Game game, GameStatus status) {
         GameDto gameDto = toGameDto(game);
         gameDto.setStatus(status);
         return gameDto;

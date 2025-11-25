@@ -3,8 +3,6 @@ package ru.danil.shkuratetskiy.tic_tac_toe.web.model;
 import java.util.List;
 
 public class GameDto {
-    private final static String STATUS_OK = "OK";
-
     private List<List<String>> field;
     private String status;
 
@@ -14,7 +12,7 @@ public class GameDto {
     }
 
     public GameDto(List<List<String>> field) {
-        this(field, STATUS_OK);
+        this(field, GameStatus.OK.getMessage());
     }
 
     public List<List<String>> getField() {
@@ -29,7 +27,7 @@ public class GameDto {
         return status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setStatus(GameStatus status) {
+        this.status = status.getMessage();
     }
 }

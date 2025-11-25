@@ -10,9 +10,11 @@ public interface GameService {
 
     boolean validateField(Game game, int row, int col);
 
-    Winner isGameOver(UUID id);
+    Winner isGameOver(Game game);
 
     Game getGameById(UUID id);
+
+    void saveGame(Game game);
 
     UUID createNewGame();
 }
