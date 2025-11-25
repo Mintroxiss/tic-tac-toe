@@ -18,10 +18,6 @@ import ru.danil.shkuratetskiy.tic_tac_toe.web.mapper.GameDtoMapper;
 import ru.danil.shkuratetskiy.tic_tac_toe.web.model.GameDto;
 import ru.danil.shkuratetskiy.tic_tac_toe.web.model.GameStatus;
 import ru.danil.shkuratetskiy.tic_tac_toe.web.model.MoveDto;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 @Controller

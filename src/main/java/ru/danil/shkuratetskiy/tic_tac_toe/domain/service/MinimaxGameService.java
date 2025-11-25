@@ -1,7 +1,5 @@
 package ru.danil.shkuratetskiy.tic_tac_toe.domain.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ru.danil.shkuratetskiy.tic_tac_toe.datasource.repository.GameRepository;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.CellType;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Game;
@@ -10,11 +8,9 @@ import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Winner;
 
 import java.util.UUID;
 
-@Service
 public class MinimaxGameService implements GameService {
     private final GameRepository repository;
 
-    @Autowired
     public MinimaxGameService(GameRepository repository) {
         this.repository = repository;
     }
