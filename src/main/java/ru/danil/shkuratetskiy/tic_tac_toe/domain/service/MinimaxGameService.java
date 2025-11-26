@@ -1,5 +1,10 @@
 package ru.danil.shkuratetskiy.tic_tac_toe.domain.service;
 
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ru.danil.shkuratetskiy.tic_tac_toe.datasource.mapper.GameEntityMapper;
+import ru.danil.shkuratetskiy.tic_tac_toe.datasource.model.GameEntity;
 import ru.danil.shkuratetskiy.tic_tac_toe.datasource.repository.GameRepository;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.CellType;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Game;
@@ -8,9 +13,11 @@ import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Winner;
 
 import java.util.UUID;
 
+@Service
 public class MinimaxGameService implements GameService {
     private final GameRepository repository;
 
+    @Autowired
     public MinimaxGameService(GameRepository repository) {
         this.repository = repository;
     }
@@ -50,7 +57,7 @@ public class MinimaxGameService implements GameService {
 
         gameField.setFieldCell(moveX, moveY, computerCellType);
 
-        repository.save(game);
+        saveGame(game);
 
         return game;
     }
@@ -111,7 +118,7 @@ public class MinimaxGameService implements GameService {
 
     @Override
     public boolean validateField(Game game, int row, int col) {
-        Game repoGame = repository.get(game.getId());
+        Game repoGame = getGameById(game.getId());
         GameField repoGameField = repoGame.getGameField();
         if (repoGameField.getFieldCell(row, col) != CellType.EMPTY) {
             return false;
@@ -126,19 +133,23 @@ public class MinimaxGameService implements GameService {
     }
 
     @Override
-    public Game getGameById(UUID id) {
-        return repository.get(id);
-    }
-
-    @Override
     public UUID createNewGame() {
         Game game = new Game();
-        repository.save(game);
+        saveGame(game);
         return game.getId();
     }
 
     @Override
+    public Game getGameById(UUID id) {
+        return repository.findById(id)
+                .map(GameEntityMapper::toGame)
+                .orElseThrow(() -> new IllegalArgumentException("Game not found: " + id));
+    }
+
+    @Transactional
+    @Override
     public void saveGame(Game game) {
-        repository.save(game);
+        GameEntity entity = GameEntityMapper.toGameEntity(game); // создаём новый объект с нужным ID
+        repository.save(entity); // JPA сама разрулит merge или insert
     }
 }

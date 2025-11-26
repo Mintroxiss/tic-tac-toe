@@ -1,19 +1,17 @@
 package ru.danil.shkuratetskiy.tic_tac_toe.datasource.model;
 
+import jakarta.persistence.*;
+
 import java.util.UUID;
 
+@Entity
+@Table(name="games")
 public class GameEntity {
+    @Id
     private UUID id;
-    private GameFieldEntity gameField;
 
-    public GameEntity() {
-
-    }
-
-    public GameEntity(UUID id, GameFieldEntity gameField) {
-        this.id = id;
-        this.gameField = gameField;
-    }
+    @Column(nullable = false)
+    private String gameFieldJson;
 
     public UUID getId() {
         return id;
@@ -23,11 +21,11 @@ public class GameEntity {
         this.id = id;
     }
 
-    public GameFieldEntity getGameField() {
-        return gameField;
+    public String getGameFieldJson() {
+        return gameFieldJson;
     }
 
-    public void setGameField(GameFieldEntity gameField) {
-        this.gameField = gameField;
+    public void setGameFieldJson(String gameFieldJson) {
+        this.gameFieldJson = gameFieldJson;
     }
 }
