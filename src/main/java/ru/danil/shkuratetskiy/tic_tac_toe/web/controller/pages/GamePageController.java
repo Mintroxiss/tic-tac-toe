@@ -34,7 +34,7 @@ public class GamePageController {
         return new RedirectView("/game/" + newGameId + "/view");
     }
 
-    @GetMapping("/{id}/view")
+    @GetMapping("/{userId}/view")
     public String viewGame(@PathVariable UUID id, Model model) throws JsonProcessingException {
         Game game = gameService.getGameById(id);
         if (game == null) return "error";
@@ -52,7 +52,7 @@ public class GamePageController {
         return "game";
     }
 
-    @GetMapping("/{id}/result")
+    @GetMapping("/{userId}/result")
     public String gameResult(@PathVariable UUID id, Model model) {
         Game game = gameService.getGameById(id);
         if (game == null) return "error";
@@ -66,7 +66,6 @@ public class GamePageController {
             case DRAW -> GameStatus.DRAW.getMessage();
         } + "!";
         model.addAttribute("resultText", message);
-        gameService.rmGame(id);
 
         return "game-result";
     }

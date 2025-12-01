@@ -1,10 +1,9 @@
-package ru.danil.shkuratetskiy.tic_tac_toe.web.controller;
+package ru.danil.shkuratetskiy.tic_tac_toe.web.controller.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Game;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Winner;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.service.GameService;
@@ -31,7 +30,7 @@ public class GamePlayController {
         return ResponseEntity.ok(newGameId);
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{userId}")
     public ResponseEntity<GameDto> move(
             @PathVariable(name = "id") UUID id,
             @RequestBody MoveDto moveDto
@@ -44,9 +43,11 @@ public class GamePlayController {
                 gameService.saveGame(game);
                 switch (winner) {
                     case PLAYER1 -> {
+                        gameService.rmGame(id);
                         return ResponseEntity.ok(GameDtoMapper.toGameDto(game, GameStatus.WIN));
                     }
                     case DRAW -> {
+                        gameService.rmGame(id);
                         return ResponseEntity.ok(GameDtoMapper.toGameDto(game, GameStatus.DRAW));
                     }
                 }
@@ -54,6 +55,7 @@ public class GamePlayController {
             game = gameService.makeComputerMove(game);
             winner = gameService.isGameOver(game);
             if (winner == Winner.PLAYER2) {
+                gameService.rmGame(id);
                 return ResponseEntity.ok(GameDtoMapper.toGameDto(game, GameStatus.LOSS));
             }
             return ResponseEntity.ok(GameDtoMapper.toGameDto(game));
