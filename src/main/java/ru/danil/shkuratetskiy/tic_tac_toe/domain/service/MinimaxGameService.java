@@ -149,7 +149,13 @@ public class MinimaxGameService implements GameService {
     @Transactional
     @Override
     public void saveGame(Game game) {
-        GameEntity entity = GameEntityMapper.toGameEntity(game); // создаём новый объект с нужным ID
-        repository.save(entity); // JPA сама разрулит merge или insert
+        GameEntity entity = GameEntityMapper.toGameEntity(game);
+        repository.save(entity);
+    }
+
+    @Transactional
+    @Override
+    public void rmGame(UUID id) {
+        repository.deleteById(id);
     }
 }

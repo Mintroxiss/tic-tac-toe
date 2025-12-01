@@ -17,4 +17,7 @@ public interface GameService {
     void saveGame(Game game);
 
     UUID createNewGame();
+
+    void rmGame(UUID id);
+
 }

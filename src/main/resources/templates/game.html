@@ -38,7 +38,7 @@ document.querySelectorAll('button[data-row][data-col]').forEach(btn => {
         const newField = field.map(r => [...r]);
         newField[row][col] = "X";
 
-        fetch('/game/' + gameId, {
+        fetch('/api/game/' + gameId, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
