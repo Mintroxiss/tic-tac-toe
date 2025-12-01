@@ -3,10 +3,8 @@ package ru.danil.shkuratetskiy.tic_tac_toe.web.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Game;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Winner;
 import ru.danil.shkuratetskiy.tic_tac_toe.domain.service.GameService;
@@ -25,6 +23,12 @@ public class GamePlayController {
     @Autowired
     public GamePlayController(GameService gameService) {
         this.gameService = gameService;
+    }
+
+    @GetMapping("/new")
+    public ResponseEntity<UUID> createNewGame() {
+        UUID newGameId = gameService.createNewGame();
+        return ResponseEntity.ok(newGameId);
     }
 
     @PostMapping("/{id}")
