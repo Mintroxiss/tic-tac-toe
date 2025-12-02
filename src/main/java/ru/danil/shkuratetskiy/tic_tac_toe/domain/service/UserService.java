@@ -27,4 +27,8 @@ public class UserService {
     public Optional<UserEntity> findByLogin(String login) {
         return repository.findByLogin(login);
     }
+
+    public Optional<UserEntity> findById(UUID id) {
+        return repository.findById(id);
+    }
 }

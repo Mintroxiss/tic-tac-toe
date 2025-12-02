@@ -4,13 +4,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.danil.shkuratetskiy.tic_tac_toe.datasource.mapper.GameEntityMapper;
-import ru.danil.shkuratetskiy.tic_tac_toe.datasource.model.GameEntity;
 import ru.danil.shkuratetskiy.tic_tac_toe.datasource.repository.GameRepository;
-import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.CellType;
-import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Game;
-import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.GameField;
-import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.Winner;
+import ru.danil.shkuratetskiy.tic_tac_toe.domain.model.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,14 +21,11 @@ public class MinimaxGameService implements GameService {
 
     /**
      * Делает ход компьютера по алгоритму "Минимакс"
-     *
-     * @return обновленная сессия игры
      */
     @Override
     public Game makeComputerMove(Game game) {
         GameField gameField = game.getGameField();
-
-        CellType computerCellType = CellType.O;
+        CellType computerCellType = game.getPlayer2CellType();
 
         int bestScore = Integer.MIN_VALUE;
         int moveX = -1;
@@ -55,34 +49,21 @@ public class MinimaxGameService implements GameService {
             }
         }
 
-        gameField.setFieldCell(moveX, moveY, computerCellType);
-
-        saveGame(game);
+        if (moveX >= 0) {
+            gameField.setFieldCell(moveX, moveY, computerCellType);
+        }
 
         return game;
     }
 
-    /**
-     * Рекурсивно оценивает ход
-     *
-     * @param field          игровое поле
-     * @param isComputerTurn чей ход
-     * @return числовая оценка
-     */
     private int minimaxScore(GameField field, boolean isComputerTurn) {
         Winner winner = field.getWinner();
         if (winner != null) {
-            switch (winner) {
-                case PLAYER1 -> {
-                    return -1;
-                }
-                case PLAYER2 -> {
-                    return 1;
-                }
-                case DRAW -> {
-                    return 0;
-                }
-            }
+            return switch (winner) {
+                case PLAYER1 -> -1;
+                case PLAYER2 -> 1;
+                case DRAW -> 0;
+            };
         }
 
         int n = GameField.HEIGHT;
@@ -117,24 +98,8 @@ public class MinimaxGameService implements GameService {
     }
 
     @Override
-    public boolean validateField(Game game, int row, int col) {
-        Game repoGame = getGameById(game.getId());
-        GameField repoGameField = repoGame.getGameField();
-        if (repoGameField.getFieldCell(row, col) != CellType.EMPTY) {
-            return false;
-        }
-        return GameField.validateField(game.getGameField(), repoGame.getGameField());
-    }
-
-    @Override
-    public Winner isGameOver(Game game) {
-        GameField gameField = game.getGameField();
-        return gameField.getWinner();
-    }
-
-    @Override
-    public UUID createNewGame() {
-        Game game = new Game();
+    public UUID createNewGame(UUID userId, boolean vsComputer) {
+        Game game = vsComputer ? Game.newVsComputer(userId) : Game.newVsPlayer(userId);
         saveGame(game);
         return game.getId();
     }
@@ -149,13 +114,80 @@ public class MinimaxGameService implements GameService {
     @Transactional
     @Override
     public void saveGame(Game game) {
-        GameEntity entity = GameEntityMapper.toGameEntity(game);
-        repository.save(entity);
+        repository.save(GameEntityMapper.toGameEntity(game));
     }
 
     @Transactional
     @Override
     public void rmGame(UUID id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public List<Game> getAvailableGames() {
+        return repository.findByState(GameState.WAITING.name())
+                .stream()
+                .map(GameEntityMapper::toGame)
+                .toList();
+    }
+
+    @Override
+    public Game joinGame(UUID gameId, UUID userId) {
+        Game game = getGameById(gameId);
+        if (game.getState() != GameState.WAITING) {
+            throw new IllegalStateException("Game is not in WAITING state");
+        }
+        game.setPlayer2Id(userId);
+        game.setState(GameState.PLAYER_TURN);
+        saveGame(game);
+        return game;
+    }
+
+    @Override
+    public Game processMove(UUID gameId, UUID userId, int row, int col) {
+        Game game = getGameById(gameId);
+
+        if (game.getState() != GameState.PLAYER_TURN) return null;
+        if (!userId.equals(game.getCurrentPlayerTurnId())) return null;
+        if (game.getGameField().getFieldCell(row, col) != CellType.EMPTY) return null;
+
+        CellType cellType = userId.equals(game.getPlayer1Id())
+                ? game.getPlayer1CellType()
+                : game.getPlayer2CellType();
+        game.getGameField().setFieldCell(row, col, cellType);
+
+        Winner winner = game.getGameField().getWinner();
+        if (winner == Winner.DRAW) {
+            game.setState(GameState.DRAW);
+            saveGame(game);
+            return game;
+        }
+        if (winner != null) {
+            game.setState(GameState.PLAYER_WIN);
+            game.setWinnerId(winner == Winner.PLAYER1 ? game.getPlayer1Id() : game.getPlayer2Id());
+            saveGame(game);
+            return game;
+        }
+
+        if (game.getPlayer2Id() == null) {
+            // vs computer — make computer move
+            makeComputerMove(game);
+            Winner computerWinner = game.getGameField().getWinner();
+            if (computerWinner == Winner.DRAW) {
+                game.setState(GameState.DRAW);
+            } else if (computerWinner != null) {
+                // computer won: winnerId remains null (no UUID for computer)
+                game.setState(GameState.PLAYER_WIN);
+            }
+        } else {
+            // vs player — switch turns
+            UUID nextPlayer = userId.equals(game.getPlayer1Id())
+                    ? game.getPlayer2Id()
+                    : game.getPlayer1Id();
+            game.setCurrentPlayerTurnId(nextPlayer);
+        }
+
+        saveGame(game);
+        return game;
     }
 }
