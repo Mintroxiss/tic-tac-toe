@@ -21,31 +21,24 @@
         </tr>
     </table>
 
-    <p id="status" th:if="${status}" th:text="${status}"></p>
+    <p id="state" th:if="${state}" th:text="${state}"></p>
 </div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
 const gameId = /*[[${gameId}]]*/ '';
 const fieldJson = /*[[${fieldJson}]]*/ '[]';
-const field = JSON.parse(fieldJson); // массив массивов строк
+const field = JSON.parse(fieldJson);
 
 document.querySelectorAll('button[data-row][data-col]').forEach(btn => {
     btn.addEventListener('click', () => {
         const row = parseInt(btn.getAttribute('data-row'));
         const col = parseInt(btn.getAttribute('data-col'));
 
-        const newField = field.map(r => [...r]);
-        newField[row][col] = "X";
-
-        fetch('/api/game/' + gameId, {
+        fetch('/api/game/' + gameId + '/move', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                row: row,
-                col: col,
-                field: newField
-            })
+            body: JSON.stringify({ row: row, col: col })
         })
         .then(response => response.json())
         .then(gameDto => {
@@ -59,23 +52,17 @@ document.querySelectorAll('button[data-row][data-col]').forEach(btn => {
                 });
             });
 
-            // Обновляем текст статуса
-            const statusEl = document.getElementById('status');
-            if (statusEl) statusEl.textContent = gameDto.status;
+            // Обновляем состояние
+            const stateEl = document.getElementById('state');
+            if (stateEl) stateEl.textContent = gameDto.state;
 
-            // --- Добавлена проверка статуса ---
-            if (gameDto.status === "Победа" ||
-                gameDto.status === "Проигрыш" ||
-                gameDto.status === "Ничья") {
-
-                // маленькая задержка — DOM успеет обновиться
+            // Проверяем конец игры
+            if (gameDto.state === 'PLAYER_WIN' || gameDto.state === 'DRAW') {
                 setTimeout(() => {
                     window.location.href = `/game/${gameId}/result`;
                 }, 50);
-
-                return; // прекращаем выполнение
+                return;
             }
-            // --- конец добавки ---
 
             // Синхронизируем массив field
             for (let r = 0; r < field.length; r++) {

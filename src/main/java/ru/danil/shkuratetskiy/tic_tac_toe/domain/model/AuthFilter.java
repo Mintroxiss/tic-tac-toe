@@ -66,7 +66,7 @@ public class AuthFilter extends GenericFilterBean {
         }
 
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(creds[0], null, Collections.emptyList());
+                new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         chain.doFilter(request, response);
