@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Крестики-нолики</title>
+</head>
+<body>
+<h1>Крестики-нолики</h1>
+
+<div th:if="${userId == null}">
+    <a href="/auth/login">Войти</a> |
+    <a href="/auth/signup">Регистрация</a>
+</div>
+
+<div th:if="${userId != null}">
+    <p>Вы вошли: <code th:text="${userId}"></code> | <a href="/auth/logout">Выйти</a></p>
+    <hr>
+    <ul>
+        <li><a href="/game/new?vsComputer=true">Новая игра с компьютером</a></li>
+        <li><a href="/game/new?vsComputer=false">Создать игру для двух игроков</a></li>
+        <li><a href="/game/available">Доступные игры (присоединиться)</a></li>
+    </ul>
+</div>
+</body>
+</html>

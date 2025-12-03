@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результат</title>
+    <style>
+        table { border-collapse: collapse; }
+        td { width: 60px; height: 60px; text-align: center; vertical-align: middle;
+             font-size: 32px; border: 2px solid #333; }
+    </style>
+</head>
+<body>
+<h1 th:text="${resultText}">Результат</h1>
+
+<table>
+    <tr th:each="row : ${field}">
+        <td th:each="cell : ${row}"
+            th:text="${cell == 'CROSS' ? 'X' : (cell == 'ZERO' ? 'O' : '')}">
+        </td>
+    </tr>
+</table>
+
+<p><a href="/">На главную</a></p>
+</body>
+</html>

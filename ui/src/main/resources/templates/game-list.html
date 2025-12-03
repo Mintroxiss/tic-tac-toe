@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Доступные игры</title>
+</head>
+<body>
+<h1>Доступные игры</h1>
+<div th:if="${#lists.isEmpty(games)}">
+    <p>Нет доступных игр</p>
+</div>
+<ul th:if="${!#lists.isEmpty(games)}">
+    <li th:each="game : ${games}">
+        Игра <code th:text="${game.id}"></code>
+        <form th:action="'/game/' + ${game.id} + '/join'" method="post" style="display:inline">
+            <button type="submit">Присоединиться</button>
+        </form>
+    </li>
+</ul>
+<p><a href="/">На главную</a></p>
+</body>
+</html>
