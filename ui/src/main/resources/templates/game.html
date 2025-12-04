@@ -25,7 +25,7 @@
         <td th:each="cell, ci : ${row}"
             th:data-row="${ri.index}"
             th:data-col="${ci.index}"
-            th:text="${cell == 'CROSS' ? 'X' : (cell == 'ZERO' ? 'O' : '')}"
+            th:text="${cell == 'X' ? 'X' : (cell == 'O' ? 'O' : '')}"
             th:classappend="${cell != 'EMPTY' ? 'taken' : ''}">
         </td>
     </tr>
@@ -50,7 +50,7 @@
         field.forEach((row, ri) => {
             const cells = rows[ri].querySelectorAll('td');
             row.forEach((cell, ci) => {
-                cells[ci].textContent = cell === 'CROSS' ? 'X' : (cell === 'ZERO' ? 'O' : '');
+                cells[ci].textContent = cell === 'X' ? 'X' : (cell === 'O' ? 'O' : '');
                 cells[ci].classList.toggle('taken', cell !== 'EMPTY');
             });
         });

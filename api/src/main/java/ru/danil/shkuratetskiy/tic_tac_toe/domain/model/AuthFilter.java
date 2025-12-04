@@ -33,14 +33,20 @@ public class AuthFilter extends GenericFilterBean {
         HttpServletResponse resp = (HttpServletResponse) response;
         String path = req.getRequestURI();
 
-        if (!path.startsWith("/api/") || path.startsWith("/api/auth") || path.startsWith("/api/game")) {
+        if (!path.startsWith("/api/") || path.startsWith("/api/auth")) {
             chain.doFilter(request, response);
             return;
         }
 
+        boolean gamePathOptionalAuth = path.startsWith("/api/game");
+
         String header = req.getHeader("Authorization");
         if (header == null || !header.startsWith("Basic ")) {
-            unauthorized(resp);
+            if (gamePathOptionalAuth) {
+                chain.doFilter(request, response);
+            } else {
+                unauthorized(resp);
+            }
             return;
         }
 
@@ -49,19 +55,31 @@ public class AuthFilter extends GenericFilterBean {
         try {
             decoded = new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
-            unauthorized(resp);
+            if (gamePathOptionalAuth) {
+                chain.doFilter(request, response);
+            } else {
+                unauthorized(resp);
+            }
             return;
         }
 
         String[] creds = decoded.split(":", 2);
         if (creds.length != 2) {
-            unauthorized(resp);
+            if (gamePathOptionalAuth) {
+                chain.doFilter(request, response);
+            } else {
+                unauthorized(resp);
+            }
             return;
         }
 
         UUID userId = authService.login(creds[0], creds[1]);
         if (userId == null) {
-            unauthorized(resp);
+            if (gamePathOptionalAuth) {
+                chain.doFilter(request, response);
+            } else {
+                unauthorized(resp);
+            }
             return;
         }
 

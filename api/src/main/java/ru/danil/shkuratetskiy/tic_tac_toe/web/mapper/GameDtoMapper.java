@@ -12,7 +12,7 @@ public class GameDtoMapper {
                 game.getId(),
                 Arrays.stream(game.getGameField().getField()).map(row ->
                         Arrays.stream(row).map(cellType ->
-                                cellType == CellType.EMPTY ? " " : cellType.toString()
+                                cellType.toString()
                         ).toList()
                 ).toList(),
                 game.getState().name(),

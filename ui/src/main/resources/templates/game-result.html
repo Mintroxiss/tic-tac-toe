@@ -15,7 +15,7 @@
 <table>
     <tr th:each="row : ${field}">
         <td th:each="cell : ${row}"
-            th:text="${cell == 'CROSS' ? 'X' : (cell == 'ZERO' ? 'O' : '')}">
+            th:text="${cell == 'X' ? 'X' : (cell == 'O' ? 'O' : '')}">
         </td>
     </tr>
 </table>
