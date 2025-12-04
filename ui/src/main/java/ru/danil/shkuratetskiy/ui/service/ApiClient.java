@@ -78,12 +78,14 @@ public class ApiClient {
         }
     }
 
-    public GameDto makeMove(String gameId, int row, int col) {
+    public GameDto makeMove(String gameId, int row, int col, String authHeader) {
         try {
+            HttpHeaders headers = jsonHeaders();
+            if (authHeader != null) headers.set("Authorization", authHeader);
             return restTemplate.exchange(
                     baseUrl + "/api/game/" + gameId + "/move",
                     HttpMethod.POST,
-                    new HttpEntity<>(Map.of("row", row, "col", col), jsonHeaders()),
+                    new HttpEntity<>(Map.of("row", row, "col", col), headers),
                     GameDto.class
             ).getBody();
         } catch (HttpClientErrorException e) {
@@ -114,6 +116,19 @@ public class ApiClient {
         } catch (HttpClientErrorException e) {
             return null;
         }
+    }
+
+    public void cancelWaitingGames(String authHeader) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            if (authHeader != null) headers.set("Authorization", authHeader);
+            restTemplate.exchange(
+                    baseUrl + "/api/game/waiting",
+                    HttpMethod.DELETE,
+                    new HttpEntity<>(null, headers),
+                    Void.class
+            );
+        } catch (HttpClientErrorException ignored) {}
     }
 
     private HttpHeaders jsonHeaders() {

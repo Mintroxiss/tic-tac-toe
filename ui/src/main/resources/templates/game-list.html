@@ -6,6 +6,7 @@
 </head>
 <body>
 <h1>Доступные игры</h1>
+<div th:if="${param.error}" style="color:red">Нельзя присоединиться к своей игре</div>
 <div th:if="${#lists.isEmpty(games)}">
     <p>Нет доступных игр</p>
 </div>

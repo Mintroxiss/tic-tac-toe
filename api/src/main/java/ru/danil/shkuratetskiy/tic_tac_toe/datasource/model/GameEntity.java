@@ -2,7 +2,9 @@ package ru.danil.shkuratetskiy.tic_tac_toe.datasource.model;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.UUID;
+
 
 @Entity
 @Table(name = "games")
@@ -33,6 +35,14 @@ public class GameEntity {
 
     @Column(nullable = false)
     private String state;
+
+    @Column(updatable = false)
+    private Instant createdAt;
+
+    @PrePersist
+    private void prePersist() {
+        this.createdAt = Instant.now();
+    }
 
     public UUID getId() { return id; }
 
@@ -71,4 +81,8 @@ public class GameEntity {
     public String getState() { return state; }
 
     public void setState(String state) { this.state = state; }
+
+    public Instant getCreatedAt() { return createdAt; }
+
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

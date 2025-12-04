@@ -39,8 +39,12 @@ public class GamePlayController {
 
     @PostMapping("/{gameId}/join")
     public ResponseEntity<GameDto> joinGame(@PathVariable UUID gameId) {
-        Game game = gameService.joinGame(gameId, getCurrentUserId());
-        return ResponseEntity.ok(GameDtoMapper.toGameDto(game));
+        try {
+            Game game = gameService.joinGame(gameId, getCurrentUserId());
+            return ResponseEntity.ok(GameDtoMapper.toGameDto(game));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/{gameId}/move")
@@ -50,6 +54,15 @@ public class GamePlayController {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(GameDtoMapper.toGameDto(game));
+    }
+
+    @DeleteMapping("/waiting")
+    public ResponseEntity<Void> cancelWaitingGames() {
+        UUID userId = getCurrentUserId();
+        if (userId != null) {
+            gameService.cancelWaitingGames(userId);
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{gameId}")

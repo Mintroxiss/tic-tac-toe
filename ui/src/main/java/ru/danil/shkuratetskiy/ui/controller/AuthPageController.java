@@ -53,6 +53,8 @@ public class AuthPageController {
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
+        String authHeader = (String) session.getAttribute("authHeader");
+        apiClient.cancelWaitingGames(authHeader);
         session.invalidate();
         return "redirect:/";
     }

@@ -21,4 +21,6 @@ public interface GameService {
     Game joinGame(UUID gameId, UUID userId);
 
     Game processMove(UUID gameId, UUID userId, int row, int col);
+
+    void cancelWaitingGames(UUID userId);
 }

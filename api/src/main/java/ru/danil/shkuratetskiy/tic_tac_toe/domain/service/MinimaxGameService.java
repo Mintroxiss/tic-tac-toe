@@ -123,6 +123,12 @@ public class MinimaxGameService implements GameService {
         repository.deleteById(id);
     }
 
+    @Transactional
+    @Override
+    public void cancelWaitingGames(UUID userId) {
+        repository.deleteByPlayer1IdAndState(userId, GameState.WAITING.name());
+    }
+
     @Override
     public List<Game> getAvailableGames() {
         return repository.findByState(GameState.WAITING.name())
@@ -136,6 +142,9 @@ public class MinimaxGameService implements GameService {
         Game game = getGameById(gameId);
         if (game.getState() != GameState.WAITING) {
             throw new IllegalStateException("Game is not in WAITING state");
+        }
+        if (userId != null && userId.equals(game.getPlayer1Id())) {
+            throw new IllegalStateException("Cannot join your own game");
         }
         game.setPlayer2Id(userId);
         game.setState(GameState.PLAYER_TURN);

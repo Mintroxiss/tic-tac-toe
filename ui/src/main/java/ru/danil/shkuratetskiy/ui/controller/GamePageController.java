@@ -48,7 +48,7 @@ public class GamePageController {
     public String joinGame(@PathVariable String gameId, HttpSession session) {
         String authHeader = (String) session.getAttribute("authHeader");
         GameDto game = apiClient.joinGame(gameId, authHeader);
-        if (game == null) return "error";
+        if (game == null) return "redirect:/game/available?error=cannot_join";
         return "redirect:/game/" + gameId + "/view";
     }
 
@@ -72,8 +72,10 @@ public class GamePageController {
 
     @PostMapping(value = "/game/{gameId}/move", produces = "application/json")
     @ResponseBody
-    public GameDto move(@PathVariable String gameId, @RequestBody Map<String, Integer> body) {
-        return apiClient.makeMove(gameId, body.get("row"), body.get("col"));
+    public GameDto move(@PathVariable String gameId, @RequestBody Map<String, Integer> body,
+                        HttpSession session) {
+        String authHeader = (String) session.getAttribute("authHeader");
+        return apiClient.makeMove(gameId, body.get("row"), body.get("col"), authHeader);
     }
 
     @GetMapping(value = "/game/{gameId}/state", produces = "application/json")
