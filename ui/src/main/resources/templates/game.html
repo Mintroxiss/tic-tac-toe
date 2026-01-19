@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Игра</title>
+    <style>
+        table { border-collapse: collapse; }
+        td { width: 60px; height: 60px; text-align: center; vertical-align: middle;
+             font-size: 32px; border: 2px solid #333; cursor: pointer; }
+        td:hover { background: #eee; }
+        td.taken { cursor: default; }
+    </style>
+</head>
+<body>
+<h1>Крестики-нолики</h1>
+<p id="status">
+    <span th:if="${state == 'WAITING'}">Ожидание второго игрока...</span>
+    <span th:if="${state == 'PLAYER_TURN' and currentPlayerTurnId == userId}">Ваш ход</span>
+    <span th:if="${state == 'PLAYER_TURN' and currentPlayerTurnId != userId}">Ход соперника</span>
+    <span th:if="${state == 'DRAW' or state == 'PLAYER_WIN'}">Игра завершена</span>
+</p>
+
+<table id="board">
+    <tr th:each="row, ri : ${field}">
+        <td th:each="cell, ci : ${row}"
+            th:data-row="${ri.index}"
+            th:data-col="${ci.index}"
+            th:text="${cell == 'X' ? 'X' : (cell == 'O' ? 'O' : '')}"
+            th:classappend="${cell != 'EMPTY' ? 'taken' : ''}">
+        </td>
+    </tr>
+</table>
+
+<p><a href="/">На главную</a></p>
+
+<script th:inline="javascript">
+    const gameId = [[${gameId}]];
+    const sessionUserId = [[${userId}]];
+    let currentState = [[${state}]];
+    let currentTurnId = [[${currentPlayerTurnId}]];
+    let polling = null;
+
+    function isMyTurn() {
+        return currentState === 'PLAYER_TURN' &&
+            (sessionUserId === null || currentTurnId === sessionUserId);
+    }
+
+    function renderBoard(field) {
+        const rows = document.querySelectorAll('#board tr');
+        field.forEach((row, ri) => {
+            const cells = rows[ri].querySelectorAll('td');
+            row.forEach((cell, ci) => {
+                cells[ci].textContent = cell === 'X' ? 'X' : (cell === 'O' ? 'O' : '');
+                cells[ci].classList.toggle('taken', cell !== 'EMPTY');
+            });
+        });
+    }
+
+    function updateStatus(state, turnId) {
+        const el = document.getElementById('status');
+        if (state === 'WAITING') {
+            el.textContent = 'Ожидание второго игрока...';
+        } else if (state === 'PLAYER_TURN') {
+            if (sessionUserId === null || turnId === sessionUserId) {
+                el.textContent = 'Ваш ход';
+            } else {
+                el.textContent = 'Ход соперника';
+            }
+        } else {
+            el.textContent = 'Игра завершена';
+        }
+    }
+
+    function handleGameEnd() {
+        if (polling) { clearInterval(polling); polling = null; }
+        window.location.href = '/game/' + gameId + '/result';
+    }
+
+    function applyGameData(data) {
+        currentState = data.state;
+        currentTurnId = data.currentPlayerTurnId;
+        renderBoard(data.field);
+        updateStatus(data.state, data.currentPlayerTurnId);
+        if (data.state === 'DRAW' || data.state === 'PLAYER_WIN') {
+            handleGameEnd();
+        }
+    }
+
+    function pollState() {
+        fetch('/game/' + gameId + '/state')
+            .then(r => r.json())
+            .then(data => applyGameData(data))
+            .catch(() => {});
+    }
+
+    document.querySelectorAll('#board td').forEach(td => {
+        td.addEventListener('click', function () {
+            if (!isMyTurn()) return;
+            if (this.classList.contains('taken')) return;
+            const row = parseInt(this.dataset.row);
+            const col = parseInt(this.dataset.col);
+            fetch('/game/' + gameId + '/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ row: row, col: col })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data) applyGameData(data);
+            })
+            .catch(() => {});
+        });
+    });
+
+    // Start polling if not in a finished state and it's not our turn (waiting for opponent or waiting for second player)
+    if (currentState !== 'DRAW' && currentState !== 'PLAYER_WIN') {
+        polling = setInterval(pollState, 2000);
+    }
+</script>
+</body>
+</html>

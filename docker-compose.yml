@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: tic-tac-toe-db
+    environment:
+      POSTGRES_DB: tic-tac-toe
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d tic-tac-toe"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: api
+      dockerfile: Dockerfile
+    container_name: tic-tac-toe-api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
